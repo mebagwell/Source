@@ -1,0 +1,49 @@
+Add user
+sudo adduser gene
+sudo usermod -aG sudo gene
+ssh-copy-id gene@
+
+
+# Master/Server uninstall
+/usr/local/bin/k3s-uninstall.sh
+
+# Agent/Worker uninstall
+/usr/local/bin/k3s-agent-uninstall.sh
+
+# Setup Cgroups
+sudo sed -i '$ s/$/ cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1 swapaccount=1/' /boot/firmware/cmdline.txt
+
+sudo hostnamectl set-hostname k3s-worker-04
+
+# On master-01
+curl -fL https://get.k3s.io | \
+INSTALL_K3S_CHANNEL=stable \
+sh -s - server \
+--token P455w04d \
+--write-kubeconfig-mode 644 \
+--disable servicelb \
+--flannel-backend=host-gw \
+--node-taint CriticalAddonsOnly=true:NoExecute 
+
+exitscp gene@192.168.30.11:/etc/rancher/k3s/k3s.yaml ~/.kube/config
+
+# For all worker nodes
+curl -fL https://get.k3s.io | \
+INSTALL_K3S_CHANNEL=stable \
+K3S_URL="https://192.168.30.11:6443" \
+K3S_TOKEN="P455w04d" \
+sh -s -
+
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.10.2/manifests/namespace.yaml
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.10.2/manifests/metallb.yaml
+
+kubectl create secret generic -n metallb-system memberlist --from-literal=mysecretkey="$(openssl rand -base64 128)"
+
+ansible rpi -b -K -m apt -a "name=open-iscsi state=present"
+
+
+helm install longhorn ./longhorn/chart/ --namespace longhorn-system
+
+kubectl run -it --rm --restart=Never busybox --image=busybox:1.28 -- nslookup www.google.com
+
+kubectl port-forward -n longhorn-system svc/longhorn-frontend 8002:80
