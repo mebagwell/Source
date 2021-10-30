@@ -1,0 +1,64 @@
+- name: Update apt repository and install common packages
+  hosts: pi
+  gather_facts: true
+  strategy: free
+  become: true
+  tasks:
+    - name: Remove SNAP from machines
+      register: updatesys
+      apt:
+        name:
+          - snapd
+        state: absent
+    - name: Install common packages
+      register: updatesys
+      apt:
+        name:
+          - curl
+          - etherwake
+          - ethtool
+          - lm-sensors
+          - cpu-checker
+          - nfs-common
+          - htop
+          - powertop
+          - nmap
+          - jq
+          - tuned
+        state: present
+    - name: Update apt cacahe, install any upgrades, and remove old packages
+      register: updatesys
+      apt:
+        update_cache: true
+        cache_valid_time: 86400
+        upgrade: true
+        autoremove: true
+        autoclean: true
+    - name: Add cgroup directives to boot command line config
+      lineinfile:
+        path: /boot/cmdline.txt
+        regexp: '((.)+?)(\scgroup_\w+=\w+)*$'
+        line: '\1 cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory'
+        backrefs: true
+    - name: Update rsyslog.conf to send to rsyslog host
+      lineinfile:
+        dest: /etc/rsyslog.conf
+        line: '*.*@@rsyslog:514'
+        insertafter: '# Default logging rules can be found in /etc/rsyslog.d/50-default.conf'
+    - name: Restart rsyslog
+      ansible.builtin.systemd:
+        state: restarted
+        name: rsyslog
+    - name: Check if a reboot is needed on all servers
+      register: reboot_required_file
+      stat: path=/var/run/reboot-required get_md5=no
+    - name: Reboot the box if kernel updated
+      reboot:
+        msg: "Reboot initiated by Ansible for kernel updates"
+        connect_timeout: 5
+        reboot_timeout: 300
+        pre_reboot_delay: 0
+        post_reboot_delay: 30
+        test_command: uptime
+      when: reboot_required_file.stat.exists
+

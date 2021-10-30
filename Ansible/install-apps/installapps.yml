@@ -1,0 +1,18 @@
+---
+- hosts: cube
+  become: true
+  tasks:
+  - name: Ansible apt install multiple packages
+    apt:
+      name
+       - curl
+       - etherwake
+       - ethtool
+       - lm-sensors
+       - cpu-checker
+       - nfs-common
+       - htop
+       - nmap
+    state: present
+    update_cache: true
+    force_apt_get: yes #forces to use apt-get

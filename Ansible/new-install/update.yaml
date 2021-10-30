@@ -1,0 +1,71 @@
+---
+- name: Update apt repository and install common packages
+  hosts: all
+  become: true
+  tasks:
+    - name: Update apt cacahe, install package upgrades, remove old packages
+      register: updatesys
+      apt:
+        update_cache: true
+        cache_valid_time: 86400
+        upgrade: true
+        autoremove: true
+        autoclean: true
+
+- name: Update physical hardware
+  hosts: hardware
+  become: true
+  tasks:
+    - name: Install packages on physical hardware
+      register: updatesys
+      apt:
+        name:
+          - curl
+          - etherwake
+          - ethtool
+          - lm-sensors
+          - cpu-checker
+          - nfs-common
+          - htop
+          - powertop
+          - nmap
+          - jq
+          - tuned
+          - prometheus-node-exporter
+        state: present
+
+    - name: Remove packages from physical hardware
+      register: updatesys
+      apt:
+        name:
+          - atop
+        state: absent
+
+- name: Update physical
+  hosts: vms
+  become: true
+  tasks:
+    - name: Install packaces on VMS/Containers
+      register: updates
+      apt:
+        name:
+          - curl
+          - nfs-common
+          - prometheus-node-exporter
+        state: present
+
+    - name: Remove packaces from VMS/Containers
+      register: updates
+      apt:
+        name:
+          - atop
+          - etherwake
+          - ethtool
+          - lm-sensors
+          - cpu-checker
+          - htop
+          - powertop
+          - nmap
+          - jq
+          - tuned
+        state: absent

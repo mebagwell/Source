@@ -1,0 +1,12 @@
+- hosts: hardware
+  become: true
+  tasks:
+    - name: Update rsyslog.conf to send to rsyslog host
+      lineinfile:
+        dest: /etc/rsyslog.conf
+        line: '*.*@@rsyslog:514'
+        insertafter: '# Default logging rules can be found in /etc/rsyslog.d/50-default.conf'
+    - name: Restart rsyslog
+      ansible.builtin.systemd:
+        state: restarted
+        name: rsyslog

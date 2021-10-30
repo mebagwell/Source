@@ -1,0 +1,17 @@
+127.0.0.1 localhost
+
+# The following lines are desirable for IPv6 capable hosts
+::1     ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+
+192.168.30.11 k3s-master-01.home.mebagwell.com k3s-master-01
+192.168.30.21 k3s-worker-01.home.mebagwell.com k3s-worker-01
+192.168.30.22 k3s-worker-02.home.mebagwell.com k3s-worker-02
+192.168.30.23 k3s-worker-03.home.mebagwell.com k3s-worker-03
+192.168.30.24 k3s-worker-04.home.mebagwell.com k3s-worker-04
+192.168.30.25 k3s-worker-05.home.mebagwell.com k3s-worker-05
+192.168.30.26 k3s-worker-06.home.mebagwell.com k3s-worker-06
+192.168.30.27 k3s-worker-06.home.mebagwell.com k3s-worker-07

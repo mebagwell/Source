@@ -1,0 +1,30 @@
+- hosts: hardware
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Stop and disable systemd-resolved
+      systemd:
+        name: systemd-resolved
+        state: stopped
+        enabled: no
+
+    - name: Delete existing /etc/resolv.conf file or link
+      file:
+        path: /etc/resolv.conf
+        state: absent
+
+    - name: Copy resolv.conf to all hosts in group
+      copy:
+        src: /home/gene/source/Ansible/fixresolver/resolv.conf
+        dest: /etc/resolv.conf
+        mode: 0644
+        owner: root
+        group: root
+
+#    - name: Copy hostfile to all hosts in group
+#      copy:
+#        src: /home/gene/source/Ansible/fixresolver/hosts
+#        dest: /etc/hosts
+#        mode: 0644
+#        owner: root
+#        group: root

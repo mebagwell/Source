@@ -1,0 +1,39 @@
+- name: Update apt repository and install common packages
+  hosts: hardware
+  gather_facts: true
+  strategy: free
+  become: true
+  tasks:
+    - name: Update apt cacahe, install package upgrades, remove old packages
+      register: updatesys
+      apt:
+        update_cache: true
+        cache_valid_time: 86400
+        upgrade: true
+        autoremove: true
+        autoclean: true
+
+    - name: Ansible apt install multiple packages
+      register: updatesys
+      apt:
+        name:
+          - curl
+          - etherwake
+          - ethtool
+          - lm-sensors
+          - cpu-checker
+          - nfs-common
+          - htop
+          - powertop
+          - nmap
+          - jq
+          - tuned
+          - prometheus-node-exporter
+        state: present
+
+    - name: Ansible apt remove multiple packages
+      register: updatesys
+      apt:
+        name:
+          - atop
+        state: absent
